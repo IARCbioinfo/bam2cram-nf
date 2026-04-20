@@ -244,15 +244,15 @@ else {
     // RUN PROCESSES
     // ---------------------------
 
-    cram_out = bam2cram(inputbams, ch_fasta, ch_fai)
+    cram_out = BAM2CRAM(inputbams, ch_fasta, ch_fai)
 
-    bam_qc   = stats_bams(bamstats)
-    cram_qc  = stats_crams(cram_out.cramstats)
+    bam_qc   = STATS_BAMS(bamstats)
+    cram_qc  = STATS_CRAMS(cram_out.cramstats)
 
     cram_bam_size = cram_out.sizecrams.join(sizebams)
     cram_bam_qc   = cram_qc.join(bam_qc)
 
-    report_qc = check_conversion(cram_bam_qc, cram_bam_size)
+    report_qc = CHECK_CONVERSION(cram_bam_qc, cram_bam_size)
 
     report_qc
         .collectFile(
