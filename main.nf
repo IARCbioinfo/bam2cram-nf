@@ -183,12 +183,12 @@ if (params.help) {
 	log.info ''
   log.info 'Mandatory arguments:'
   log.info '    --bams   FOLDER                  Input folder containing BAM files and indexes.'
-  log.info '    --fasta          FILE                  Path to fasta reference to encode the CRAM file
-  log.info '    --fai          FILE                  Path to fasta reference index.
+  log.info '    --fasta          FILE                  Path to fasta reference to encode the CRAM file'
+  log.info '    --fai          FILE                  Path to fasta reference index.'
   log.info 'Input alternatives:'
-  log.info '    --bam_csv          FILE                  Path to file with tabular data for each sample to process [label bam index ]
+  log.info '    --bam_csv          FILE                  Path to file with tabular data for each sample to process [label bam index ]'
   log.info 'Output:'
-  log.info '    --output_folder   FOLDER                  Ouput folder [default: ./results]
+  log.info '    --output_folder   FOLDER                  Ouput folder [default: ./results]'
   log.info ''
   exit 0
 }
