@@ -65,8 +65,6 @@ process BAM2CRAM {
 
     output:
         tuple val(sample), file("${sample}.cram"), file("${sample}.cram.crai"), emit: cramfiles
-      //  tuple val(sample), file("${sample}.cram"), file("${sample}.cram.crai"), emit: cramstats
-      //  tuple val(sample), file("${sample}.cram"), file("${sample}.cram.crai"), emit: sizecrams
 
     script:
     """
@@ -119,8 +117,8 @@ process CHECK_CONVERSION {
     publishDir "${params.output_folder}/qc/check", mode: 'copy'
 
     input:
-        tuple val(sample), file(c_fs), file(c_stat), file(b_fs), file(b_stat)
         tuple val(sample), file(cram), file(cram_index), file(bam), file(bam_index)
+        tuple val(sample), file(c_fs), file(c_stat), file(b_fs), file(b_stat)
 
     output:
         file("${sample}_check.report.txt")
@@ -158,8 +156,8 @@ process CHECK_CONVERSION {
 
 workflow {
 
-  		log.info IARC_Header()
-      log.info tool_header()
+  	log.info IARC_Header()
+    log.info tool_header()
 // --------------------------------------------------
 // INFO / HELP
 // --------------------------------------------------
@@ -201,7 +199,7 @@ else {
    log.info "help=${params.help}"
  }
 
-// LAUNCH
+// SET INPUTS
 
     ch_fasta = Channel.value(file(params.fasta))
         .ifEmpty{ exit 1, "Fasta file not found: ${params.fasta}" }
@@ -236,8 +234,8 @@ else {
     }
 
     // Duplicate channels explicitly
-    bamstats  = inputbams
-    sizebams  = inputbams
+    bam4stats  = inputbams
+    bam4check  = inputbams
 
 
     // ---------------------------
@@ -245,14 +243,15 @@ else {
     // ---------------------------
 
     cram_out = BAM2CRAM(inputbams, ch_fasta, ch_fai)
+	cram4check = cram_out
 
-    bam_qc   = STATS_BAMS(bamstats)
-    cram_qc  = STATS_CRAMS(cram_out.cramstats)
+    bam_qc   = STATS_BAMS(bam4stats)
+    cram_qc  = STATS_CRAMS(cram_out)
 
-    cram_bam_size = cram_out.sizecrams.join(sizebams)
+    cram_bam_list = cram4check.join(bam4check)
     cram_bam_qc   = cram_qc.join(bam_qc)
 
-    report_qc = CHECK_CONVERSION(cram_bam_qc, cram_bam_size)
+    report_qc = CHECK_CONVERSION(cram_bam_list, cram_bam_qc)
 
     report_qc
         .collectFile(
