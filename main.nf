@@ -46,8 +46,9 @@ def tool_header (){
 if (!params.fasta || !params.fai)
     exit 1, "The reference fasta file and/or its index are missing"
 
-if(!params.bams && !params.bam_csv)
+if( !params.bams && !params.bam_csv ) {
     exit 1, "No bams are provided!"
+}
 
 // ---------------------------
 // PROCESSES
@@ -131,7 +132,7 @@ process CHECK_CONVERSION {
     else
         fs_test="fail"
     fi
-    //Remove the line of stat that is diferent because of file extension
+    #Remove the line of stat that is diferent because of file extension
     grep -v "# The command line was:" ${c_stat} > ${c_stat}.no_cmd_line
     grep -v "# The command line was:" ${b_stat} > ${b_stat}.no_cmd_line
 
@@ -207,12 +208,13 @@ else {
     ch_fai = Channel.value(file(params.fai))
         .ifEmpty{ exit 1, "Fasta index file not found: ${params.fai}" }
 
-    if(params.bam_csv) {
-        inputbams = Channel
-            .fromPath(file(params.bam_csv))
-            .splitCsv(header: true, sep: '\t', strip: true)
-            .map{ row -> tuple(row.label, file(row.bam), file(row.index)) }
-            .ifEmpty{ exit 1, "params.bams_csv was empty - no input files supplied" }
+if(params.bam_csv) {
+    inputbams = Channel
+        .fromPath(params.bam_csv)
+        .ifEmpty { exit 1, "CSV file not found: ${params.bam_csv}" }
+        .splitCsv(header: true, sep: '\t', strip: true)
+        .map { row -> tuple(row.label, file(row.bam), file(row.index)) }
+        .ifEmpty { exit 1, "CSV was empty - no input files supplied" }
 
     } else {
         if(file(params.bams).listFiles().findAll { it.name ==~ /.*bam/ }.size() > 0){
